@@ -1,0 +1,87 @@
+import java.sql.*;
+
+public class Indexopt {
+
+	public static void main(String[] args) throws SQLException {
+		// load DB2 JDBC driver
+		try {
+			DriverManager.registerDriver(new com.ibm.db2.jcc.DB2Driver());
+		} catch (Exception cnfe) {
+			System.out.println("Cannot find class!!!");
+		}
+		
+
+		// connect to database
+		
+		Connection conn = DriverManager.getConnection("jdbc:db2://db2:50000/cs421", "dwu18", "t34m0wh0");
+		Statement statement = conn.createStatement ();
+
+		try {
+			Runtime rt = Runtime.getRuntime();
+			Process pr = rt.exec("db2 -f project3C.clp");
+		} catch (Exception e) {
+		}
+
+		
+		int sqlCode=0;      // Variable to hold SQLCODE
+     		String sqlState="00000";  // Variable to hold SQLSTATE
+
+
+		try {
+			String query = "select p.providerID, p.firstName, p.lastName, p.specialty, p.experience, p.averageMemberCost, count(*) as count from provider p, services s where p.providerID = s.providerID group by p.providerID, p.firstName, p.lastName, p.specialty, p.experience, p.averageMemberCost order by count desc"; 
+			//without indexing
+			long startTime = System.currentTimeMillis();
+
+			java.sql.ResultSet rs1 = statement.executeQuery(query);
+			while (rs1.next()) {
+				int providerID = rs1.getInt(1);
+				int averageMemberCost = rs1.getInt(6);
+				int count = rs1.getInt(7);
+				System.out.println("providerID = " + providerID + " averageMemberCost = " + averageMemberCost + " count = " + count);
+			}
+			System.out.println ("DONE"); 
+			long endTime = System.currentTimeMillis();
+			long time = (endTime - startTime);
+			System.out.println("time = " + time);
+
+
+				
+			String indexing = "create index ind1 on Provider(providerID)"; 
+							
+			statement.executeUpdate(indexing);
+				
+
+			//with indexing
+			startTime = System.currentTimeMillis();
+			
+			java.sql.ResultSet rs2 = statement.executeQuery(query);
+			while (rs2.next()) {
+				int providerID = rs2.getInt(1);
+				int averageMemberCost = rs2.getInt(6);
+				int count = rs2.getInt(7);
+				System.out.println("providerID = " + providerID + " averageMemberCost = " + averageMemberCost + " count = " + count);
+			}
+			System.out.println ("DONE"); 
+
+			endTime = System.currentTimeMillis();
+			time = (endTime - startTime);
+			System.out.println("time = " + time);
+
+
+
+		} catch (SQLException e) {
+   						sqlCode = e.getErrorCode(); // Get SQLCODE
+                				sqlState = e.getSQLState(); // Get SQLSTATE
+ 						System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+						System.out.println("please try again");
+		}
+
+	
+		try {
+			Runtime rt = Runtime.getRuntime();
+			Process pr = rt.exec("db2 -f project3D.clp");
+		} catch (Exception e) {
+		}
+	}
+}
+

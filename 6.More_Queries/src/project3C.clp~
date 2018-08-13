@@ -1,0 +1,277 @@
+
+connect to cs421
+
+create table plans ( \
+planID int not null, \
+type varchar(15), \
+memberFee int, \
+numberOfMembers int, \
+planProfitability int, \
+primary key (planID))
+
+create table provider ( \
+providerID int not null, \
+firstName varchar(20), \
+lastName varchar(20), \
+specialty varchar(20), \
+experience int, \
+averageMemberCost float, \
+primary key (providerID))
+
+create table dentalOffice ( \
+locationID int not null, \
+address varchar(32), \
+state varchar(5), \
+totalAverageMemberCost float, \
+primary key (locationID))
+
+create table demographics ( \
+state varchar(5) not null, \
+popSize bigint, \
+popDensity int, \
+racialShareW int, \
+racialShareB int, \
+racialShareA int, \
+racialShareH int, \
+averageIncome int, \
+primary key (state))
+
+create table members ( \
+memberID int not null, \
+planID int not null, \
+firstName varchar(20), \
+lastName varchar(20), \
+gender varchar(1), \
+age int, \
+race varchar(10), \
+address varchar(50), \
+state varchar(5), \
+membershipTenure int, \
+primary key (memberID), \
+foreign key (planID) references plans)
+
+create table claims ( \
+claimID int not null, \
+memberID int not null, \
+providerID int not null, \
+planID int not null, \
+procedureCode varchar(32), \
+cost int, \
+coPayCost int, \
+insurancePay int, \
+date date, \
+primary key (claimID), \
+foreign key (memberID) references members, \
+foreign key (planID) references plans, \
+foreign key (providerID) references provider)
+
+create table dentalMedicalHistory ( \
+memberID int not null, \
+date date not null, \
+procedureCode varchar(32), \
+cost int, \
+primary key (memberID, date), \
+foreign key (memberID) references members)
+
+create table visits ( \
+memberID int not null, \
+locationID int not null, \
+primary key (memberID, locationID), \
+foreign key (memberID) references members, \
+foreign key (locationID) references dentalOffice)
+
+create table worksAt ( \
+providerID int not null, \
+locationID int not null, \
+primary key (providerID, locationID), \
+foreign key (providerID) references provider, \
+foreign key (locationID) references dentalOffice)
+
+create table submits ( \
+memberID int not null, \
+claimID int not null, \
+primary key (memberID, claimID), \
+foreign key (memberID) references members, \
+foreign key (claimID) references claims)
+
+create table services ( \
+providerID int not null, \
+memberID int not null, \
+primary key (providerID, memberID), \
+foreign key (providerID) references provider, \
+foreign key (memberID) references members)
+
+create table belongsTo ( \
+memberID int not null, \
+state varchar(5) not null, \
+primary key (memberID), \
+foreign key (memberID) references members, \
+foreign key (state) references demographics)
+
+create table has ( \
+memberID int not null, \
+date date not null, \
+primary key (memberID, date), \
+foreign key (memberID) references members)
+
+create table participateIn ( \
+memberID int not null, \
+planID int not null, \
+membershipTenure int not null, \
+primary key (memberID, planID), \
+foreign key (memberID) references members, \
+foreign key (planID) references plans, \
+foreign key (membershipTenure) references members)
+
+
+
+CREATE TRIGGER checkclaims \
+before insert on claims \
+referencing new as nclaim \
+for each row \
+when (nclaim.cost != nclaim.coPayCost + nclaim.insurancePay) \
+signal sqlstate '75000' \
+set message_text = 'copaycost and insurancepay did not sum up to cost'
+
+
+
+
+
+
+INSERT INTO plans (planID,type,memberFee,numberOfMembers,planProfitability) VALUES (1,'Company',40,9,1)
+INSERT INTO plans (planID,type,memberFee,numberOfMembers,planProfitability) VALUES (2,'Government',70,8,2)
+INSERT INTO plans (planID,type,memberFee,numberOfMembers,planProfitability) VALUES (3,'Government',29,9,3)
+INSERT INTO plans (planID,type,memberFee,numberOfMembers,planProfitability) VALUES (4,'Company',31,9,4)
+INSERT INTO plans (planID,type,memberFee,numberOfMembers,planProfitability) VALUES (5,'Government',59,5,5)
+INSERT INTO plans (planID,type,memberFee,numberOfMembers,planProfitability) VALUES (6,'Government',47,10,6)
+
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (1,'Uta','Higgins','General',5)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (2,'Kamal','Dawson','Dental Surgeon',20)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (3,'McKenzie','Knight','General',10)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (4,'Veronica','Wynn','Orthodontist',20)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (5,'Montana','Burnett','Dental Surgeon',16)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (6,'Arden','Stark','General',1)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (7,'Heidi','Key','General',13)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (8,'Amaya','Barron','Dental Surgeon',5)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (9,'Katelyn','Steele','General',11)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (10,'Lane','Benton','Orthodontist',13)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (11,'Griffith','Turner','Orthodontist',18)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (12,'Meredith','Snider','Dental Surgeon',4)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (13,'Kibo','Carter','General',6)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (14,'Lael','Becker','Orthodontist',17)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (15,'Driscoll','Vargas','Orthodontist',11)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (16,'Whilemina','Nolan','General',18)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (17,'Cherokee','Moody','General',11)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (18,'Jonas','Vang','General',13)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (19,'Rosalyn','Chase','General',14)
+INSERT INTO provider (providerID,firstName,lastName,specialty,experience) VALUES (20,'Damian','Wiggins','General',1)
+
+
+INSERT INTO dentalOffice (locationID,address,state) VALUES (1,'Ap #553-4240 Nibh Rd.','DL')
+INSERT INTO dentalOffice (locationID,address,state) VALUES (2,'Ap #441-9437 In Street','DL')
+INSERT INTO dentalOffice (locationID,address,state) VALUES (3,'Ap #990-1563 Dapibus Avenue','AL')
+INSERT INTO dentalOffice (locationID,address,state) VALUES (4,'177-9572 Risus St.','CT')
+INSERT INTO dentalOffice (locationID,address,state) VALUES (5,'Ap #545-7354 Fusce Av.','CT')
+INSERT INTO dentalOffice (locationID,address,state) VALUES (6,'355-9875 Enim St.','CT')
+
+INSERT INTO demographics (state,popSize,popDensity,racialShareW,racialShareB,racialShareA,racialShareH,averageIncome) VALUES ('AL',186879017,43,41,25,5,13,37497)
+INSERT INTO demographics (state,popSize,popDensity,racialShareW,racialShareB,racialShareA,racialShareH,averageIncome) VALUES ('CT',603024499,24,37,30,6,15,25837)
+INSERT INTO demographics (state,popSize,popDensity,racialShareW,racialShareB,racialShareA,racialShareH,averageIncome) VALUES ('DL',399516892,35,31,21,6,18,32605)
+
+
+
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (1,5,'Demetria','Pena','M',55,'Black','P.O. Box 519, 4619 Non, Av.','AL',16)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (2,5,'Anthony','Duke','M',80,'Asian','Ap #929-3193 Tellus Rd.','AL',9)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (3,2,'Mercedes','Wiley','F',86,'Other','P.O. Box 916, 5280 Elit, St.','DL',3)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (4,6,'Zephr','Hawkins','M',93,'Hispanic','696-4343 Consectetuer Rd.','AL',24)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (5,5,'Upton','Burris','F',53,'Black','Ap #457-2275 Enim Rd.','CT',35)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (6,1,'Cadman','Maynard','F',62,'Other','5088 Luctus Rd.','DL',9)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (7,3,'Wendy','Sutton','F',48,'Hispanic','Ap #169-3817 At, Av.','CT',19)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (8,4,'Carol','Jacobs','M',69,'Asian','Ap #179-3946 Tristique Rd.','CT',14)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (9,2,'Helen','Warren','F',40,'White','462-6819 Pretium Avenue','CT',3)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (10,3,'Kasimir','Calderon','M',71,'Hispanic','8278 Netus Rd.','CT',10)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (11,6,'Sybil','Huffman','F',77,'Black','Ap #143-3859 Consectetuer Rd.','CT',8)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (12,4,'Rhoda','Case','F',56,'White','Ap #639-4484 Velit Street','DL',8)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (13,3,'Hall','Chase','M',91,'Other','Ap #257-9792 Faucibus Ave','DL',17)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (14,4,'Dylan','Barry','M',41,'Black','881-7256 Eleifend, Rd.','DL',25)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (15,5,'Eleanor','Avery','M',40,'Asian','4855 Erat. Ave','DL',22)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (16,4,'Jordan','Watkins','M',26,'Other','P.O. Box 519, 5325 Nullam Ave','DL',24)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (17,4,'Kelly','Lowery','F',79,'Other','P.O. Box 886, 4311 Lacus. St.','CT',8)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (18,6,'Gary','Cobb','F',64,'Black','P.O. Box 123, 6318 Aliquet Road','DL',29)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (19,6,'Chelsea','Cannon','F',79,'Other','Ap #372-5252 Metus. St.','CT',17)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (20,2,'Walter','Bender','M',70,'Other','522-836 Sit Rd.','AL',29)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (21,4,'Latifah','Collier','M',65,'Hispanic','9612 Velit. Rd.','DL',18)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (22,5,'Brock','Baird','F',61,'Black','P.O. Box 390, 411 Laoreet Rd.','AL',23)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (23,5,'Kennan','Head','F',52,'Asian','Ap #148-4701 Et, Street','CT',30)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (24,1,'Martin','Heath','F',62,'Asian','717-3517 Adipiscing Street','AL',26)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (25,2,'Cherokee','Bernard','F',31,'Other','P.O. Box 639, 3972 Accumsan Rd.','DL',10)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (26,2,'Raven','James','M',33,'Hispanic','6013 Consequat St.','CT',28)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (27,5,'Mason','Merrill','M',22,'Other','289-9994 Aliquet Rd.','CT',2)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (28,1,'Jael','Cruz','F',44,'Hispanic','598-355 Accumsan Rd.','CT',12)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (29,6,'Orli','Short','F',73,'Hispanic','873-8267 Semper, Street','DL',12)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (30,5,'Troy','Black','M',93,'Hispanic','7759 Phasellus Ave','DL',31)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (31,1,'Ursula','Dunlap','F',59,'White','401-5855 Quam St.','AL',3)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (32,2,'Nash','Griffith','M',67,'Asian','Ap #446-4510 Sagittis Ave','AL',6)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (33,1,'Hyatt','Guerrero','F',93,'Asian','P.O. Box 495, 4585 Eget Road','CT',1)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (34,5,'Lev','Shaffer','F',38,'Black','Ap #785-1329 Quisque St.','AL',20)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (35,5,'Octavia','Pollard','M',50,'Black','P.O. Box 581, 2722 Dui St.','CT',3)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (36,2,'Nyssa','Moon','M',33,'Black','P.O. Box 210, 468 Elementum, Ave','CT',29)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (37,2,'Yolanda','Blackburn','F',58,'White','233-8986 Est Av.','AL',18)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (38,3,'Joshua','Boyer','F',80,'Other','3276 Lectus Avenue','CT',24)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (39,5,'Seth','Wolf','M',48,'Other','974-9518 Sed Rd.','AL',3)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (40,4,'Ferris','Mcleod','F',25,'Black','1444 Pretium Rd.','DL',7)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (41,1,'Murphy','Ware','M',67,'Hispanic','7890 Vulputate Ave','AL',12)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (42,4,'Grady','Duffy','M',44,'Hispanic','P.O. Box 523, 598 Integer St.','AL',10)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (43,1,'Ramona','Lang','F',62,'Hispanic','133-7584 Nec Rd.','AL',20)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (44,4,'Martin','Mccoy','M',94,'White','616-8074 Nulla Rd.','DL',22)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (45,6,'Lacy','Pitts','F',20,'Other','P.O. Box 998, 1167 Nam Road','CT',9)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (46,6,'Rachel','Solis','F',67,'Black','224-1449 Ipsum. Rd.','DL',36)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (47,2,'Lois','Tran','F',85,'Other','P.O. Box 817, 2969 Sed Av.','AL',11)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (48,5,'Katelyn','Frank','M',94,'Black','7735 Duis Street','DL',3)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (49,3,'Clark','Walker','F',73,'Other','2395 Nibh. Avenue','DL',21)
+INSERT INTO members (memberID,planID,firstName,lastName,gender,age,race,address,state,membershipTenure) VALUES (50,2,'Griffith','Oconnor','F',18,'Black','P.O. Box 396, 5701 Ridiculus Road','AL',31)
+
+
+
+
+
+
+INSERT INTO worksAt (providerID,locationID) VALUES (1,2)
+INSERT INTO worksAt (providerID,locationID) VALUES (2,2)
+INSERT INTO worksAt (providerID,locationID) VALUES (3,4)
+INSERT INTO worksAt (providerID,locationID) VALUES (4,3)
+INSERT INTO worksAt (providerID,locationID) VALUES (5,4)
+INSERT INTO worksAt (providerID,locationID) VALUES (6,4)
+INSERT INTO worksAt (providerID,locationID) VALUES (7,2)
+INSERT INTO worksAt (providerID,locationID) VALUES (8,1)
+INSERT INTO worksAt (providerID,locationID) VALUES (9,4)
+INSERT INTO worksAt (providerID,locationID) VALUES (10,4)
+INSERT INTO worksAt (providerID,locationID) VALUES (11,5)
+INSERT INTO worksAt (providerID,locationID) VALUES (12,5)
+INSERT INTO worksAt (providerID,locationID) VALUES (13,2)
+INSERT INTO worksAt (providerID,locationID) VALUES (14,5)
+INSERT INTO worksAt (providerID,locationID) VALUES (15,2)
+INSERT INTO worksAt (providerID,locationID) VALUES (16,3)
+INSERT INTO worksAt (providerID,locationID) VALUES (17,2)
+INSERT INTO worksAt (providerID,locationID) VALUES (18,6)
+INSERT INTO worksAt (providerID,locationID) VALUES (19,1)
+INSERT INTO worksAt (providerID,locationID) VALUES (20,5)
+
+INSERT INTO participateIn( \
+SELECT memberID, planID, membershipTenure \
+from members)
+
+
+INSERT INTO belongsTo( \
+SELECT memberID, state \
+from members)
+
+
+INSERT INTO claims (claimID,memberID,providerID,planID,procedureCode,cost,coPayCost,insurancePay,date) VALUES (1,17,6,5,'M120',306,28,7,'2001-12-09')
+
+INSERT INTO claims (claimID,memberID,providerID,planID,procedureCode,cost,coPayCost,insurancePay,date) VALUES (1,17,6,5,'M120',35,28,7,'2001-12-09')
+
+
+
+
+

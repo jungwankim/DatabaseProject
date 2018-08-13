@@ -1,0 +1,15 @@
+DROP TRIGGER checkclaims
+
+CREATE TRIGGER checkclaims \
+before insert on claims \
+referencing new as nclaim \
+for each row \
+when (nclaim.cost != nclaim.coPayCost + nclaim.insurancePay) \
+signal sqlstate '75000' \
+set message_text = 'copaycost and insurancepay did not sum up to cost'
+
+
+INSERT INTO claims (claimID,memberID,providerID,planID,procedureCode,cost,coPayCost,insurancePay,date) VALUES (61,17,6,5,'M120',306,28,7,'2004-12-09')
+
+INSERT INTO claims (claimID,memberID,providerID,planID,procedureCode,cost,coPayCost,insurancePay,date) VALUES (61,17,6,5,'M120',35,28,7,'2004-12-09')
+
